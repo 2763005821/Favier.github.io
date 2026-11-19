@@ -138,12 +138,12 @@ const starterWorks = [
 ];
 const KEY="personal_archive_works_v1";
 let works;
-try { works=JSON.parse(localStorage.getItem(KEY)) || starterWorks; } catch(e) { works=starterWorks; }
+try { const saved=JSON.parse(localStorage.getItem(KEY)); works=Array.isArray(saved)?saved.filter(x=>x&&typeof x==="object"&&typeof x.title==="string").map(normalizeWork):starterWorks; } catch(e) { works=starterWorks; }
 let activeFilter="全部", currentId=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(works));return true;}catch(e){alert("本地存储空间不足。请减少图片大小后重试。");return false;}}
-function safeImage(value){return typeof value==="string" && /^data:image\\/(?:png|jpeg|webp);base64,/i.test(value) && value.length<1300000 ? value : "";}
+function safeImage(value){return typeof value==="string" && /^data:image\/(?:png|jpeg|webp);base64,/i.test(value) && value.length<1300000 ? value : "";}
 function safeLink(value){try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}}
 function normalizeWork(w){return {id:String(w.id||("work-"+Date.now()+"-"+Math.random().toString(36).slice(2,7))),title:String(w.title||"未命名作品").slice(0,80),category:["文字","视觉","设计","实验"].includes(w.category)?w.category:"实验",date:String(w.date||""),tags:Array.isArray(w.tags)?w.tags.map(String).slice(0,20):[],description:String(w.description||"").slice(0,5000),image:safeImage(w.image),link:safeLink(w.link),tone:/^#[0-9a-f]{3,8}$/i.test(w.tone||"")?w.tone:"#d8c9b8"};}
 function render(){
