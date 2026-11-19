@@ -168,7 +168,7 @@ function showDetail(id){
  const detailImage=safeImage(w.image);$("detailImage").style.display=detailImage?"block":"none";$("detailImage").src=detailImage;
  $("detailCategory").textContent=w.category;$("detailTitle").textContent=w.title;
  $("detailDate").textContent=w.date||"未注明日期";$("detailTags").textContent=(w.tags||[]).join(" · ");
- $("detailDescription").textContent=w.description+(w.show_extract_code&&w.extract_code?"\\n\\n百度网盘提取码："+w.extract_code:"");
+ $("detailDescription").textContent=w.description+(w.show_extract_code&&w.extract_code?"\n\n百度网盘提取码："+w.extract_code:"");
  const detailLink=safeLink(w.link);$("detailLink").style.display=detailLink?"inline-block":"none";$("detailLink").href=detailLink||"#";
  $("detailBackdrop").classList.add("show");
 }
@@ -184,7 +184,7 @@ async function refreshRemote(){
  if(activeFilter!=="全部")params.set("category",activeFilter);
  params.set("page_size","30");
  try{
-  const response=await fetch(API_BASE_URL.replace(/\\/$/,"")+"/api/works?"+params.toString(),{headers:{"Accept":"application/json"}});
+  const response=await fetch(API_BASE_URL.replace(/\/$/,"")+"/api/works?"+params.toString(),{headers:{"Accept":"application/json"}});
   if(!response.ok)throw new Error("API 请求失败（HTTP "+response.status+"）");
   const payload=await response.json();
   if(!payload.ok||!Array.isArray(payload.data))throw new Error(payload.error||"API 返回格式不正确");
