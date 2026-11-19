@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4f1eb">
+<title>作品集 · Personal Archive</title>
+<style>
+:root{
+  --bg:#f4f1eb;--paper:#fffefa;--ink:#242520;--muted:#77786f;
+  --line:#dedbd2;--accent:#a64e38;--accent-soft:#f1e3dc;
+  --olive:#747b5a;--shadow:0 18px 50px rgba(43,39,30,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.65}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.wrap{width:min(1120px,calc(100% - 44px));margin:auto}
+header{padding:26px 0;border-bottom:1px solid var(--line)}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.brand{font-family:Georgia,serif;font-size:20px;letter-spacing:.04em}
+.nav-right{display:flex;gap:20px;align-items:center;color:var(--muted);font-size:13px}
+.nav-right a{text-decoration:none}
+.hero{padding:84px 0 70px;display:grid;grid-template-columns:1.3fr .7fr;gap:50px;align-items:end}
+.eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-family:Georgia,"Noto Serif SC",serif;font-size:clamp(42px,6vw,76px);line-height:1.08;letter-spacing:-.045em;font-weight:500;margin:18px 0 22px}
+.hero p{max-width:620px;color:var(--muted);font-size:15px;margin:0}
+.hero-note{border-left:1px solid var(--line);padding:10px 0 10px 24px;color:var(--muted);font-size:13px}
+.hero-note strong{display:block;color:var(--ink);font-family:Georgia,serif;font-size:30px;font-weight:400;margin-bottom:6px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filter{border:1px solid transparent;background:transparent;color:var(--muted);padding:8px 13px;border-radius:99px;font-size:12px}
+.filter.active{background:var(--ink);color:white}
+.tools{display:flex;gap:8px;align-items:center}
+.search{width:190px;border:1px solid var(--line);background:var(--paper);border-radius:99px;padding:9px 14px;font-size:12px;outline:none}
+.btn{border:1px solid var(--ink);background:var(--ink);color:white;border-radius:99px;padding:9px 16px;font-size:12px;transition:.2s}
+.btn:hover{background:var(--accent);border-color:var(--accent)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin:34px 0 80px}
+.work{background:var(--paper);border:1px solid #e8e4db;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s}
+.work:hover{transform:translateY(-5px);box-shadow:var(--shadow)}
+.cover{height:220px;position:relative;overflow:hidden;background:#d9d5c9}
+.cover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+.work:hover .cover img{transform:scale(1.04)}
+.cover-placeholder{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;font-family:Georgia,"Noto Serif SC",serif;font-size:30px;line-height:1.25;color:rgba(35,36,30,.72)}
+.cover-mark{position:absolute;top:14px;left:14px;background:rgba(255,254,250,.86);padding:5px 9px;font-size:10px;letter-spacing:.1em}
+.work-body{padding:19px 20px 20px}
+.work-meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.work h2{font-family:Georgia,"Noto Serif SC",serif;font-weight:500;font-size:23px;margin:10px 0 8px}
+.work p{color:var(--muted);font-size:12px;margin:0;min-height:42px}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:17px}
+.tag{font-size:10px;color:var(--olive);background:#eff0e8;padding:4px 8px;border-radius:99px}
+.empty{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted);border:1px dashed var(--line)}
+footer{border-top:1px solid var(--line);padding:28px 0 45px;color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:20px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(24,25,21,.55);display:none;align-items:center;justify-content:center;padding:22px;z-index:5}
+.modal-backdrop.show{display:flex}
+.modal{background:var(--paper);width:min(680px,100%);max-height:90vh;overflow:auto;box-shadow:var(--shadow);position:relative}
+.modal-inner{padding:30px}
+.modal-close{position:absolute;right:14px;top:12px;border:0;background:transparent;font-size:25px;color:var(--muted)}
+.modal h2{font:500 34px/1.2 Georgia,"Noto Serif SC",serif;margin:10px 0}
+.modal p{color:var(--muted);font-size:14px;white-space:pre-wrap}
+.modal-cover{width:100%;max-height:330px;object-fit:cover;display:block;background:#e4dfd3}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+.field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+.field.full{grid-column:1/-1}
+.field input,.field textarea,.field select{border:1px solid var(--line);background:#fff;padding:10px 11px;color:var(--ink);outline:none;border-radius:2px}
+.field textarea{min-height:105px;resize:vertical}
+.form-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:5px}
+.notice{font-size:11px;color:var(--muted);margin-top:10px}
+@media(max-width:800px){.hero{grid-template-columns:1fr;gap:25px;padding:60px 0}.hero-note{max-width:420px}.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.wrap{width:min(100% - 28px,1120px)}.nav-right a{display:none}.toolbar{align-items:flex-start;flex-direction:column}.tools{width:100%}.search{flex:1;width:auto}.grid{grid-template-columns:1fr;gap:16px}.cover{height:230px}.hero{padding:48px 0}.form{grid-template-columns:1fr}.field.full,.form-actions{grid-column:auto}footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <div class="brand">PERSONAL ARCHIVE<span style="color:var(--accent)">.</span></div>
+  <nav class="nav-right"><a href="#works">作品</a><a href="#about">关于</a><button class="btn ghost" id="exportBtn">导出作品数据</button></nav>
+</div></header>
+<main class="wrap">
+  <section class="hero" id="about">
+    <div>
+      <div class="eyebrow">A collection of ideas & works</div>
+      <h1>把想法，<br>变成可以分享的作品。</h1>
+      <p>这里收录创作、实验与阶段性成果。它们可能是一段文字、一张图像、一个设计，也可能是尚在生长中的想法。</p>
+    </div>
+    <div class="hero-note"><strong>Selected works</strong>一个用于展示与测试的个人作品档案。点击卡片查看详情，也可以添加自己的作品。</div>
+  </section>
+  <section id="works">
+    <div class="toolbar">
+      <div class="filters" id="filters">
+        <button class="filter active" data-filter="全部">全部</button>
+        <button class="filter" data-filter="文字">文字</button>
+        <button class="filter" data-filter="视觉">视觉</button>
+        <button class="filter" data-filter="设计">设计</button>
+        <button class="filter" data-filter="实验">实验</button>
+      </div>
+      <div class="tools"><input class="search" id="search" placeholder="搜索作品…" aria-label="搜索作品"><button class="btn" id="addBtn">＋ 添加作品</button></div>
+    </div>
+    <div class="grid" id="workGrid"></div>
+  </section>
+</main>
+<footer class="wrap"><span>© <span id="year"></span> PERSONAL ARCHIVE</span><span>Designed as a small space for unfinished and finished things.</span></footer>
+
+<div class="modal-backdrop" id="detailBackdrop">
+  <article class="modal"><button class="modal-close" data-close="detailBackdrop" aria-label="关闭">×</button><img class="modal-cover" id="detailImage" alt=""><div class="modal-inner"><div class="eyebrow" id="detailCategory"></div><h2 id="detailTitle"></h2><div class="work-meta"><span id="detailDate"></span><span id="detailTags"></span></div><p id="detailDescription"></p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:22px"><a class="btn" id="detailLink" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none">打开作品 ↗</a><button class="btn ghost" id="deleteBtn">删除此作品</button></div></div></article>
+</div>
+
+<div class="modal-backdrop" id="formBackdrop">
+  <section class="modal"><button class="modal-close" data-close="formBackdrop" aria-label="关闭">×</button><div class="modal-inner">
+    <div class="eyebrow">Add to archive</div><h2>添加一件作品</h2>
+    <form class="form" id="workForm">
+      <label class="field">作品标题<input name="title" required maxlength="80" placeholder="例如：夏日手记"></label>
+      <label class="field">作品类别<select name="category"><option>文字</option><option>视觉</option><option>设计</option><option>实验</option></select></label>
+      <label class="field">日期<input name="date" type="date"></label>
+      <label class="field">标签<input name="tags" placeholder="小说, 随笔, 原型"></label>
+      <label class="field full">简短介绍<textarea name="description" required maxlength="1000" placeholder="介绍作品的主题、背景或创作过程……"></textarea></label>
+      <label class="field full">封面图片（可选）<input name="image" type="file" accept="image/*"></label>
+      <label class="field full">作品链接（可选）<input name="link" type="url" placeholder="https://..."></label>
+      <div class="form-actions"><button type="button" class="btn ghost" data-close="formBackdrop">取消</button><button class="btn" type="submit">保存作品</button></div>
+    </form>
+    <div class="notice">提示：这是纯前端测试版。作品和图片保存在当前浏览器的本地存储中，清理浏览器数据可能导致内容丢失；其他访客暂时看不到你添加的作品。</div>
+  </div></section>
+</div>
+<script>
+const starterWorks = [
+ {id:"sample-1",title:"夏恋梦之歌",category:"文字",date:"2026-11-18",tags:["小说","长篇创作"],description:"一部仍在持续生长的长篇作品。这里可以放置故事简介、创作缘起、章节入口，以及你希望读者首先感受到的主题。",tone:"#d8c9b8",image:"",link:""},
+ {id:"sample-2",title:"形状与留白",category:"视觉",date:"2026-10-12",tags:["视觉实验","构图"],description:"记录一次关于形状、色彩与空间关系的视觉练习。可以在这里补充作品说明、使用工具和创作过程。",tone:"#b9c3b0",image:"",link:""},
+ {id:"sample-3",title:"交互原型 01",category:"设计",date:"2026-09-26",tags:["UI","原型"],description:"一个用于测试信息组织和交互流程的小型原型。后续可以替换为真实项目截图、在线演示地址或设计文档。",tone:"#c5c5d1",image:"",link:""},
+ {id:"sample-4",title:"数据与生命",category:"实验",date:"2026-08-08",tags:["研究","数据分析"],description:"用于展示研究项目、数据可视化、实验流程或阶段性发现。建议明确写出问题、方法和主要结果。",tone:"#d6c6a4",image:"",link:""}
+];
+const KEY="personal_archive_works_v1";
+let works;
+try { works=JSON.parse(localStorage.getItem(KEY)) || starterWorks; } catch(e) { works=starterWorks; }
+let activeFilter="全部", currentId=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(works));}catch(e){alert("本地存储空间不足。请减少图片大小后重试。");}}
+function render(){
+ const q=$("search").value.trim().toLowerCase();
+ const list=works.filter(w=>(activeFilter==="全部"||w.category===activeFilter)&&[w.title,w.description,(w.tags||[]).join(" ")].join(" ").toLowerCase().includes(q));
+ $("workGrid").innerHTML=list.length?list.map(w=>`
+  <article class="work" data-id="${esc(w.id)}" tabindex="0" role="button" aria-label="查看${esc(w.title)}">
+   <div class="cover">${w.image?`<img src="${w.image}" alt="${esc(w.title)}封面">`:`<div class="cover-placeholder" style="background:${w.tone||"#d9d5c9"}">${esc(w.title)}</div>`}<span class="cover-mark">${esc(w.category)}</span></div>
+   <div class="work-body"><div class="work-meta"><span>${esc(w.date||"未注明日期")}</span><span>VIEW ↗</span></div><h2>${esc(w.title)}</h2><p>${esc(w.description)}</p><div class="tags">${(w.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div></div>
+  </article>`).join(""):`<div class="empty">没有找到匹配的作品。<br>试试其他关键词，或添加一件新作品。</div>`;
+ document.querySelectorAll(".work").forEach(el=>{
+  const open=()=>showDetail(el.dataset.id);
+  el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});
+ });
+}
+function showDetail(id){
+ const w=works.find(x=>x.id===id);if(!w)return;currentId=id;
+ $("detailImage").style.display=w.image?"block":"none";$("detailImage").src=w.image||"";
+ $("detailCategory").textContent=w.category;$("detailTitle").textContent=w.title;
+ $("detailDate").textContent=w.date||"未注明日期";$("detailTags").textContent=(w.tags||[]).join(" · ");
+ $("detailDescription").textContent=w.description;
+ $("detailLink").style.display=w.link?"inline-block":"none";$("detailLink").href=w.link||"#";
+ $("detailBackdrop").classList.add("show");
+}
+function closeModal(id){$(id).classList.remove("show");}
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
+document.querySelectorAll(".modal-backdrop").forEach(b=>b.addEventListener("click",e=>{if(e.target===b)b.classList.remove("show");}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal-backdrop").forEach(m=>m.classList.remove("show"));});
+$("filters").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;activeFilter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));render();});
+$("search").addEventListener("input",render);
+$("addBtn").addEventListener("click",()=>$("formBackdrop").classList.add("show"));
+$("workForm").addEventListener("submit",async e=>{
+ e.preventDefault();const f=e.currentTarget,fd=new FormData(f);let image="";
+ const file=fd.get("image");
+ if(file&&file.size){
+  if(file.size>900*1024){alert("为了避免占满浏览器存储，封面图片请控制在 900KB 以内。");return;}
+  image=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});
+ }
+ const item={id:"work-"+Date.now(),title:fd.get("title").trim(),category:fd.get("category"),date:fd.get("date"),tags:fd.get("tags").split(/[,，]/).map(x=>x.trim()).filter(Boolean),description:fd.get("description").trim(),image,link:fd.get("link").trim(),tone:"#d8c9b8"};
+ works.unshift(item);persist();f.reset();closeModal("formBackdrop");activeFilter="全部";document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x.dataset.filter==="全部"));render();
+});
+$("deleteBtn").addEventListener("click",()=>{if(!currentId)return;if(confirm("确定删除这件作品吗？此操作无法撤销。")){works=works.filter(w=>w.id!==currentId);persist();closeModal("detailBackdrop");render();}});
+$("exportBtn").addEventListener("click",()=>{
+ const blob=new Blob([JSON.stringify(works,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="personal-archive-backup.json";a.click();URL.revokeObjectURL(url);
+});
+$("year").textContent=new Date().getFullYear();render();
+</script>
+</body>
+</html>
