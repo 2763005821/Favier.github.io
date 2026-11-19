@@ -136,14 +136,18 @@ const starterWorks = [
  {id:"sample-3",title:"交互原型 01",category:"设计",date:"2026-09-26",tags:["UI","原型"],description:"一个用于测试信息组织和交互流程的小型原型。后续可以替换为真实项目截图、在线演示地址或设计文档。",tone:"#c5c5d1",image:"",link:""},
  {id:"sample-4",title:"数据与生命",category:"实验",date:"2026-08-08",tags:["研究","数据分析"],description:"用于展示研究项目、数据可视化、实验流程或阶段性发现。建议明确写出问题、方法和主要结果。",tone:"#d6c6a4",image:"",link:""}
 ];
+const API_BASE_URL = ""; // 部署 Worker 后填写完整 API 根地址，例如 https://favier-archive-api.example.workers.dev
+const remoteMode = Boolean(API_BASE_URL);
 const KEY="personal_archive_works_v1";
-let works;
-try { const saved=JSON.parse(localStorage.getItem(KEY)); works=Array.isArray(saved)?saved.filter(x=>x&&typeof x==="object"&&typeof x.title==="string").map(normalizeWork):starterWorks; } catch(e) { works=starterWorks; }
+let works=[];
+if (!remoteMode) {
+ try { const saved=JSON.parse(localStorage.getItem(KEY)); works=Array.isArray(saved)?saved.filter(x=>x&&typeof x==="object"&&typeof x.title==="string").map(normalizeWork):starterWorks; } catch(e) { works=starterWorks; }
+}
 let activeFilter="全部", currentId=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(works));return true;}catch(e){alert("本地存储空间不足。请减少图片大小后重试。");return false;}}
-function safeImage(value){return typeof value==="string" && /^data:image\/(?:png|jpeg|webp);base64,/i.test(value) && value.length<1300000 ? value : "";}
+function safeImage(value){if(typeof value!=="string"||value.length>1300000)return "";if(/^data:image\/(?:png|jpeg|webp);base64,/i.test(value))return value;try{const u=new URL(value);return u.protocol==="https:"?u.href:"";}catch{return "";}}
 function safeLink(value){try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}}
 function normalizeWork(w){return {id:String(w.id||("work-"+Date.now()+"-"+Math.random().toString(36).slice(2,7))),title:String(w.title||"未命名作品").slice(0,80),category:["文字","视觉","设计","实验"].includes(w.category)?w.category:"实验",date:String(w.date||""),tags:Array.isArray(w.tags)?w.tags.map(String).slice(0,20):[],description:String(w.description||"").slice(0,5000),image:safeImage(w.image),link:safeLink(w.link),tone:/^#[0-9a-f]{3,8}$/i.test(w.tone||"")?w.tone:"#d8c9b8"};}
 function render(){
@@ -164,7 +168,7 @@ function showDetail(id){
  const detailImage=safeImage(w.image);$("detailImage").style.display=detailImage?"block":"none";$("detailImage").src=detailImage;
  $("detailCategory").textContent=w.category;$("detailTitle").textContent=w.title;
  $("detailDate").textContent=w.date||"未注明日期";$("detailTags").textContent=(w.tags||[]).join(" · ");
- $("detailDescription").textContent=w.description;
+ $("detailDescription").textContent=w.description+(w.show_extract_code&&w.extract_code?"\\n\\n百度网盘提取码："+w.extract_code:"");
  const detailLink=safeLink(w.link);$("detailLink").style.display=detailLink?"inline-block":"none";$("detailLink").href=detailLink||"#";
  $("detailBackdrop").classList.add("show");
 }
@@ -172,8 +176,27 @@ function closeModal(id){$(id).classList.remove("show");}
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
 document.querySelectorAll(".modal-backdrop").forEach(b=>b.addEventListener("click",e=>{if(e.target===b)b.classList.remove("show");}));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal-backdrop").forEach(m=>m.classList.remove("show"));});
-$("filters").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;activeFilter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));render();});
-$("search").addEventListener("input",render);
+async function refreshRemote(){
+ if(!remoteMode)return;
+ const params=new URLSearchParams();
+ const q=$("search").value.trim();
+ if(q)params.set("q",q);
+ if(activeFilter!=="全部")params.set("category",activeFilter);
+ params.set("page_size","30");
+ try{
+  const response=await fetch(API_BASE_URL.replace(/\\/$/,"")+"/api/works?"+params.toString(),{headers:{"Accept":"application/json"}});
+  if(!response.ok)throw new Error("API 请求失败（HTTP "+response.status+"）");
+  const payload=await response.json();
+  if(!payload.ok||!Array.isArray(payload.data))throw new Error(payload.error||"API 返回格式不正确");
+  works=payload.data.map(normalizeWork);
+  render();
+ }catch(error){
+  $("workGrid").innerHTML="<div class=\\"empty\\">暂时无法连接作品数据库。<br>请检查 API 地址和 Cloudflare Worker 部署状态。<br><small>"+esc(error.message)+"</small></div>";
+ }
+}
+$("filters").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;activeFilter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));remoteMode?refreshRemote():render();});
+let searchTimer;
+$("search").addEventListener("input",()=>{if(!remoteMode){render();return;}clearTimeout(searchTimer);searchTimer=setTimeout(refreshRemote,220);});
 $("addBtn").addEventListener("click",()=>$("formBackdrop").classList.add("show"));
 $("workForm").addEventListener("submit",async e=>{
  e.preventDefault();const f=e.currentTarget,fd=new FormData(f);let image="";
@@ -207,7 +230,12 @@ $("importFile").addEventListener("change",async e=>{
  }catch(err){alert("导入失败："+err.message);}
  finally{e.target.value="";}
 });
-$("year").textContent=new Date().getFullYear();render();
+$("year").textContent=new Date().getFullYear();
+if(remoteMode){
+ $("addBtn").hidden=true;$("importBtn").hidden=true;$("exportBtn").hidden=true;$("deleteBtn").hidden=true;
+ document.querySelector(".notice").textContent="当前连接远程作品数据库。此版本暂不开放网页端编辑；请使用 backend/README.md 中的导入工具管理作品。百度网盘分享链接由数据库统一提供。";
+ refreshRemote();
+}else{render();}
 </script>
 </body>
 </html>
