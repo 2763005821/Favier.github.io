@@ -1,0 +1,18 @@
+{
+  "name": "favier-archive-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create favier-archive",
+    "db:migrate:local": "wrangler d1 migrations apply favier-archive --local",
+    "db:migrate:remote": "wrangler d1 migrations apply favier-archive --remote",
+    "db:import:local": "node scripts/import-works.mjs --local",
+    "db:import:remote": "node scripts/import-works.mjs --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
