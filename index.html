@@ -191,7 +191,7 @@ async function refreshRemote(){
   works=payload.data.map(normalizeWork);
   render();
  }catch(error){
-  $("workGrid").innerHTML="<div class=\\"empty\\">暂时无法连接作品数据库。<br>请检查 API 地址和 Cloudflare Worker 部署状态。<br><small>"+esc(error.message)+"</small></div>";
+  $("workGrid").innerHTML="<div class=\"empty\">暂时无法连接作品数据库。<br>请检查 API 地址和 Cloudflare Worker 部署状态。<br><small>"+esc(error.message)+"</small></div>";
  }
 }
 $("filters").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;activeFilter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));remoteMode?refreshRemote():render();});
