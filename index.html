@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#f4f1eb">
-<title>作品集 · Personal Archive</title>
+<meta name="description" content="个人作品档案，收录文字创作、视觉实验、设计与研究记录。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Personal Archive — 作品档案">
+<meta property="og:description" content="一个持续生长的个人作品空间。">
+<meta property="og:url" content="https://2763005821.github.io/Favier.github.io/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23242520'/%3E%3Cpath d='M12 9h18v4H17v6h11v4H17v9h-5z' fill='%23f4f1eb'/%3E%3C/svg%3E">
+<title>Personal Archive — 作品档案</title>
 <style>
 :root{
   --bg:#f4f1eb;--paper:#fffefa;--ink:#242520;--muted:#77786f;
@@ -76,7 +82,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 45px;color:var(--muted);f
 <body>
 <header><div class="wrap nav">
   <div class="brand">PERSONAL ARCHIVE<span style="color:var(--accent)">.</span></div>
-  <nav class="nav-right"><a href="#works">作品</a><a href="#about">关于</a><button class="btn ghost" id="exportBtn">导出作品数据</button></nav>
+  <nav class="nav-right"><a href="#works">作品</a><a href="#about">关于</a><button class="btn ghost" id="importBtn">导入数据</button><button class="btn ghost" id="exportBtn">导出数据</button><input id="importFile" type="file" accept="application/json,.json" hidden></nav>
 </div></header>
 <main class="wrap">
   <section class="hero" id="about">
@@ -136,13 +142,16 @@ try { works=JSON.parse(localStorage.getItem(KEY)) || starterWorks; } catch(e) { 
 let activeFilter="全部", currentId=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(works));}catch(e){alert("本地存储空间不足。请减少图片大小后重试。");}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(works));return true;}catch(e){alert("本地存储空间不足。请减少图片大小后重试。");return false;}}
+function safeImage(value){return typeof value==="string" && /^data:image\\/(?:png|jpeg|webp);base64,/i.test(value) && value.length<1300000 ? value : "";}
+function safeLink(value){try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}}
+function normalizeWork(w){return {id:String(w.id||("work-"+Date.now()+"-"+Math.random().toString(36).slice(2,7))),title:String(w.title||"未命名作品").slice(0,80),category:["文字","视觉","设计","实验"].includes(w.category)?w.category:"实验",date:String(w.date||""),tags:Array.isArray(w.tags)?w.tags.map(String).slice(0,20):[],description:String(w.description||"").slice(0,5000),image:safeImage(w.image),link:safeLink(w.link),tone:/^#[0-9a-f]{3,8}$/i.test(w.tone||"")?w.tone:"#d8c9b8"};}
 function render(){
  const q=$("search").value.trim().toLowerCase();
  const list=works.filter(w=>(activeFilter==="全部"||w.category===activeFilter)&&[w.title,w.description,(w.tags||[]).join(" ")].join(" ").toLowerCase().includes(q));
  $("workGrid").innerHTML=list.length?list.map(w=>`
   <article class="work" data-id="${esc(w.id)}" tabindex="0" role="button" aria-label="查看${esc(w.title)}">
-   <div class="cover">${w.image?`<img src="${w.image}" alt="${esc(w.title)}封面">`:`<div class="cover-placeholder" style="background:${w.tone||"#d9d5c9"}">${esc(w.title)}</div>`}<span class="cover-mark">${esc(w.category)}</span></div>
+   <div class="cover">${w.image?`<img src="${esc(safeImage(w.image))}" alt="${esc(w.title)}封面">`:`<div class="cover-placeholder" style="background:${w.tone||"#d9d5c9"}">${esc(w.title)}</div>`}<span class="cover-mark">${esc(w.category)}</span></div>
    <div class="work-body"><div class="work-meta"><span>${esc(w.date||"未注明日期")}</span><span>VIEW ↗</span></div><h2>${esc(w.title)}</h2><p>${esc(w.description)}</p><div class="tags">${(w.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div></div>
   </article>`).join(""):`<div class="empty">没有找到匹配的作品。<br>试试其他关键词，或添加一件新作品。</div>`;
  document.querySelectorAll(".work").forEach(el=>{
@@ -152,11 +161,11 @@ function render(){
 }
 function showDetail(id){
  const w=works.find(x=>x.id===id);if(!w)return;currentId=id;
- $("detailImage").style.display=w.image?"block":"none";$("detailImage").src=w.image||"";
+ const detailImage=safeImage(w.image);$("detailImage").style.display=detailImage?"block":"none";$("detailImage").src=detailImage;
  $("detailCategory").textContent=w.category;$("detailTitle").textContent=w.title;
  $("detailDate").textContent=w.date||"未注明日期";$("detailTags").textContent=(w.tags||[]).join(" · ");
  $("detailDescription").textContent=w.description;
- $("detailLink").style.display=w.link?"inline-block":"none";$("detailLink").href=w.link||"#";
+ const detailLink=safeLink(w.link);$("detailLink").style.display=detailLink?"inline-block":"none";$("detailLink").href=detailLink||"#";
  $("detailBackdrop").classList.add("show");
 }
 function closeModal(id){$(id).classList.remove("show");}
@@ -170,6 +179,7 @@ $("workForm").addEventListener("submit",async e=>{
  e.preventDefault();const f=e.currentTarget,fd=new FormData(f);let image="";
  const file=fd.get("image");
  if(file&&file.size){
+  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){alert("封面仅支持 JPG、PNG 或 WebP。");return;}
   if(file.size>900*1024){alert("为了避免占满浏览器存储，封面图片请控制在 900KB 以内。");return;}
   image=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});
  }
@@ -178,8 +188,24 @@ $("workForm").addEventListener("submit",async e=>{
 });
 $("deleteBtn").addEventListener("click",()=>{if(!currentId)return;if(confirm("确定删除这件作品吗？此操作无法撤销。")){works=works.filter(w=>w.id!==currentId);persist();closeModal("detailBackdrop");render();}});
 $("exportBtn").addEventListener("click",()=>{
- const blob=new Blob([JSON.stringify(works,null,2)],{type:"application/json"});
+ const payload={version:1,exportedAt:new Date().toISOString(),works};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="personal-archive-backup.json";a.click();URL.revokeObjectURL(url);
+});
+$("importBtn").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  if(file.size>5*1024*1024)throw new Error("文件不能超过 5 MB。");
+  const data=JSON.parse(await file.text()),items=Array.isArray(data)?data:data.works;
+  if(!Array.isArray(items))throw new Error("JSON 中没有作品数组。");
+  if(items.length>200)throw new Error("单次最多导入 200 件作品。");
+  const imported=items.filter(x=>x&&typeof x==="object"&&typeof x.title==="string").map(normalizeWork);
+  if(!confirm("导入将替换当前浏览器中的 "+works.length+" 件作品，导入 "+imported.length+" 件。建议先导出备份。继续吗？"))return;
+  works=imported;
+  if(persist())render();
+ }catch(err){alert("导入失败："+err.message);}
+ finally{e.target.value="";}
 });
 $("year").textContent=new Date().getFullYear();render();
 </script>
