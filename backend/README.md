@@ -4,103 +4,103 @@ GitHub Pages 前端 + Cloudflare Workers API + Cloudflare D1 数据库。实际�
 
 ## 目录
 
-- \`src/index.js\`：只读公开 API。
-- \`migrations/0001_initial.sql\`：D1 数据表。
-- \`scripts/import-works.mjs\`：从网站导出的 JSON 备份批量导入作品。
-- \`wrangler.toml\`：Workers 与 D1 配置。
+- `src/index.js`：只读公开 API。
+- `migrations/0001_initial.sql`：D1 数据表。
+- `scripts/import-works.mjs`：从网站导出的 JSON 备份批量导入作品。
+- `wrangler.toml`：Workers 与 D1 配置。
 
 ## 1. 准备
 
 安装 Node.js 20 或更高版本，然后在此目录执行：
 
-\`\`\`bash
+```bash
 npm install
 npx wrangler login
-\`\`\`
+```
 
 Wrangler 4.x 用于本项目。
 
 ## 2. 创建 D1
 
-\`\`\`bash
+```bash
 npm run db:create
-\`\`\`
+```
 
-命令输出会包含 database_id。把它复制到 \`wrangler.toml\` 的 \`database_id\`，替换 \`REPLACE_WITH_D1_DATABASE_ID\`。
+命令输出会包含 database_id。把它复制到 `wrangler.toml` 的 `database_id`，替换 `REPLACE_WITH_D1_DATABASE_ID`。
 
 ## 3. 创建数据库表
 
 先在本地验证：
 
-\`\`\`bash
+```bash
 npm run db:migrate:local
-\`\`\`
+```
 
 然后创建远程表：
 
-\`\`\`bash
+```bash
 npm run db:migrate:remote
-\`\`\`
+```
 
 ## 4. 本地运行和测试
 
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 检查：
 
-- \`http://localhost:8787/api/health\`
-- \`http://localhost:8787/api/works\`
-- \`http://localhost:8787/api/works?q=夏恋\`
+- `http://localhost:8787/api/health`
+- `http://localhost:8787/api/works`
+- `http://localhost:8787/api/works?q=夏恋`
 
 ## 5. 部署
 
-\`\`\`bash
+```bash
 npm run deploy
-\`\`\`
+```
 
-部署成功后 Wrangler 会显示类似 \`https://favier-archive-api.<你的账户>.workers.dev\` 的地址。
+部署成功后 Wrangler 会显示类似 `https://favier-archive-api.<你的账户>.workers.dev` 的地址。
 
 检查：
 
-\`\`\`text
+```text
 https://你的-worker地址/api/health
 https://你的-worker地址/api/works
-\`\`\`
+```
 
 ## 6. 让 GitHub Pages 使用 API
 
-打开仓库根目录的 \`index.html\`，找到：
+打开仓库根目录的 `index.html`，找到：
 
-\`\`\`js
+```js
 const API_BASE_URL = "";
-\`\`\`
+```
 
 把空字符串替换成实际 Worker 根地址，例如：
 
-\`\`\`js
+```js
 const API_BASE_URL = "https://favier-archive-api.your-subdomain.workers.dev";
-\`\`\`
+```
 
 提交后 GitHub Pages 会自动发布更新。API 是公开只读接口；不要把 Cloudflare API Token、数据库凭据或管理员密钥写入前端。
 
 ## 7. 导入作品
 
-先在网站原来的本地模式点击“导出数据”，得到 \`personal-archive-backup.json\`。将文件放在本机任意位置，在 backend 目录执行：
+先在网站原来的本地模式点击“导出数据”，得到 `personal-archive-backup.json`。将文件放在本机任意位置，在 backend 目录执行：
 
-\`\`\`bash
+```bash
 npm run db:import:remote -- "C:/path/to/personal-archive-backup.json"
-\`\`\`
+```
 
-也可以用 \`--local\` 导入 Wrangler 本地数据库。导入脚本会将原有的 \`link\` 字段映射为 \`share_url\`，并将普通作品默认设为 published。需要暂不公开的记录，可在 JSON 对应对象中设置 \`"status": "draft"\`。
+也可以用 `--local` 导入 Wrangler 本地数据库。导入脚本会将原有的 `link` 字段映射为 `share_url`，并将普通作品默认设为 published。需要暂不公开的记录，可在 JSON 对应对象中设置 `"status": "draft"`。
 
 字段说明：
-- \`share_url\`：百度网盘分享链接。
-- \`extract_code\`：提取码。
-- \`show_extract_code\`：只有设为 \`true\` 时，公开 API 才返回提取码。
-- \`cover_url\`：建议使用 HTTPS 图片地址；不再把大尺寸 base64 图片存进 D1。
-- \`status\`：\`published\` 或 \`draft\`。
+- `share_url`：百度网盘分享链接。
+- `extract_code`：提取码。
+- `show_extract_code`：只有设为 `true` 时，公开 API 才返回提取码。
+- `cover_url`：建议使用 HTTPS 图片地址；不再把大尺寸 base64 图片存进 D1。
+- `status`：`published` 或 `draft`。
 
 ## API
 
@@ -111,12 +111,12 @@ npm run db:import:remote -- "C:/path/to/personal-archive-backup.json"
 ### GET /api/works
 
 参数：
-- \`q\`：标题、简介和标签关键词，最多 80 个字符。
-- \`category\`：文字、视觉、设计、实验。
-- \`page\`：页码。
-- \`page_size\`：每页条数，最大 30。
+- `q`：标题、简介和标签关键词，最多 80 个字符。
+- `category`：文字、视觉、设计、实验。
+- `page`：页码。
+- `page_size`：每页条数，最大 30。
 
-只返回 \`published\` 作品。搜索使用 SQLite LIKE，适合当前小型中文作品目录；数据量显著增长后再评估专门的中文全文检索方案。
+只返回 `published` 作品。搜索使用 SQLite LIKE，适合当前小型中文作品目录；数据量显著增长后再评估专门的中文全文检索方案。
 
 ### GET /api/works/:slug
 
